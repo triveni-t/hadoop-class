@@ -1,0 +1,241 @@
+# HADOOP
+
+# Ip address
+ifconfig
+sudo apt update 
+
+# Java
+sudo apt install openjdk-8-jdk
+ls /usr/lib/jvm/java-8-openjdk-amd64
+nano ~/.bashrc
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export PATH=$PATH:$JAVA_HOME/bin
+source .bashrc
+
+echo $JAVA_HOME
+java -version #1.8
+
+# Passwordless ssh
+ssh localhost
+sudo apt-get install openssh-server openssh-client
+ssh localhost
+ssh-keygen -t rsa -P ""
+cat $HOME/.ssh/id_rsa.pub >> $HOME/.ssh/authorized_keys
+ssh localhost
+exit
+
+# Hadoop
+mkdir -p Desktop/course/softwares
+cd Desktop/course/softwares
+wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.4/hadoop-3.3.4.tar.gz 
+tar -xzvf hadoop-3.3.4.tar.gz
+
+# Stand alone mode
+ls
+nano ~/.bashrc
+export HADOOP_HOME=$HOME/Desktop/course/softwares/hadoop-3.3.4
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+source ~/.bashrc
+hadoop version
+
+nano ~/.bashrc
+
+export HADOOP_HOME=$HOME/Desktop/course/softwares/hadoop-3.3.4
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_YARN_HOME=$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export HADOOP_INSTALL=$HADOOP_HOME
+export HADOOP_OPTS="-Djava.library.path=$HADOOP_HOME/lib"
+export HADOOP_OPTS="-Djava.library.path=$HADOOP_COMMON_LIB_NATIVE_DIR"
+export HADOOP_SECURITY_CONF_DIR
+
+source ~/.bashrc
+
+hadoop version
+cd $HADOOP_HOME/etc/hadoop
+
+nano hadoop-env.sh 
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
+nano core-site.xml
+<configuration>
+
+   <property> 
+      <name>fs.default.name</name> 
+      <value>hdfs://localhost:9000</value> 
+   </property>
+   
+</configuration>
+
+nano hdfs-site.xml
+<configuration>
+
+   <property> 
+      <name>dfs.replication</name> 
+      <value>1</value> 
+   </property> 
+   <property> 
+      <name>dfs.name.dir</name> 
+      <value>file:///home/tri/hadoopinfra/hdfs/namenode </value> 
+   </property> 
+   <property> 
+      <name>dfs.data.dir</name>
+      <value>file:///home/tri/hadoopinfra/hdfs/datanode </value > 
+   </property>
+   
+</configuration>
+
+hadoop classpath
+
+
+nano yarn-site.xml
+<configuration>
+
+   <property> 
+      <name>yarn.nodemanager.aux-services</name> 
+      <value>mapreduce_shuffle</value> 
+   </property>
+   <property>
+    <name>yarn.application.classpath</name>
+    <value>/home/tri/Desktop/course/softwares/hadoop-3.3.4/etc/hadoop:/home/tri/Desktop/course/softwares/hadoop-3.3.4/share/hadoop/common/lib/*:/home/tri/Desktop/course/softwares/hadoop-3.3.4/share/hadoop/common/*:/home/tri/Desktop/course/softwares/hadoop-3.3.4/share/hadoop/hdfs:/home/tri/Desktop/course/softwares/hadoop-3.3.4/share/hadoop/hdfs/lib/*:/home/tri/Desktop/course/softwares/hadoop-3.3.4/share/hadoop/hdfs/*:/home/tri/Desktop/course/softwares/hadoop-3.3.4/share/hadoop/mapreduce/*:/home/tri/Desktop/course/softwares/hadoop-3.3.4/share/hadoop/yarn:/home/tri/Desktop/course/softwares/hadoop-3.3.4/share/hadoop/yarn/lib/*:/home/tri/Desktop/course/softwares/hadoop-3.3.4/share/hadoop/yarn/*</value>
+ </property>
+   
+</configuration>
+
+nano mapred-site.xml
+<configuration>
+
+   <property> 
+      <name>mapreduce.framework.name</name> 
+      <value>yarn</value> 
+   </property>
+<property>
+  <name>mapreduce.reduce.env</name>
+  <value>HADOOP_MAPRED_HOME=$HOME/Desktop/course/softwares/hadoop-3.3.4</value>
+</property>
+
+<property>
+  <name>yarn.app.mapreduce.am.env</name>
+  <value>HADOOP_MAPRED_HOME=$HOME/Desktop/course/softwares/hadoop-3.3.4</value>
+</property>
+
+<property>
+  <name>mapreduce.map.env</name>
+  <value>HADOOP_MAPRED_HOME=$HOME/Desktop/course/softwares/hadoop-3.3.4</value>
+</property>
+
+
+</configuration>
+
+cd ~
+hdfs namenode -format
+start-dfs.sh
+start-yarn.sh
+
+# Port to access Hadoop
+http://localhost:9870/
+http://localhost:8088/
+
+stop-yarn.sh
+stop-dfs.sh
+
+
+# HIVE
+cd Desktop/course/softwares
+wget https://apache.osuosl.org/hive/hive-3.1.2/apache-hive-3.1.2-bin.tar.gz
+tar -xzf apache-hive-3.1.2-bin.tar.gz
+
+nano ~/.bashrc
+export HIVE_HOME=$HOME/Desktop/course/softwares/hive
+export PATH=$PATH:$HIVE_HOME/sbin:$HIVE_HOME/bin
+export CLASSPATH=$CLASSPATH:$HADOOP_HOME/lib/*:$HIVE_HOME/lib/*
+source ~/.bashrc
+
+cd $HIVE_HOME/conf
+nano hive-env.sh
+export HADOOP_HOME=$HOME/Desktop/course/softwares/hadoop-3.3.4
+
+# Metastore - Apache Derby configuration
+cd Desktop/course/softwares
+wget http://archive.apache.org/dist/db/derby/db-derby-10.4.2.0/db-derby-10.4.2.0-bin.tar.gz
+tar zxvf db-derby-10.4.2.0-bin.tar.gz
+mv db-derby-10.4.2.0-bin derby
+
+nano ~/.bashrc
+export DERBY_HOME=$HOME/Desktop/course/softwares/derby
+export PATH=$PATH:$DERBY_HOME/bin
+export CLASSPATH=$CLASSPATH:$DERBY_HOME/lib/derby.jar:$DERBY_HOME/lib/derbytools.jar
+source ~/.bashrc
+
+mkdir $DERBY_HOME/data
+
+# Configure Derby for Hive
+cd $HIVE_HOME/conf
+nano hive-site.xml
+<configuration>
+
+   <property>
+   	<name>javax.jdo.option.ConnectionURL</name>
+   	<value>jdbc:derby:;databaseName=metastore_db;create=true</value>
+    <description>JDBC connect string for a JDBC metastore </description>
+   </property>
+   
+</configuration>
+
+nano jpox.properties
+
+javax.jdo.PersistenceManagerFactoryClass =
+
+org.jpox.PersistenceManagerFactoryImpl
+org.jpox.autoCreateSchema = false
+org.jpox.validateTables = false
+org.jpox.validateColumns = false
+org.jpox.validateConstraints = false
+org.jpox.storeManagerType = rdbms
+org.jpox.autoCreateSchema = true
+org.jpox.autoStartMechanismMode = checked
+org.jpox.transactionIsolation = read_committed
+javax.jdo.option.DetachAllOnCommit = true
+javax.jdo.option.NontransactionalRead = true
+javax.jdo.option.ConnectionDriverName = org.apache.derby.jdbc.ClientDriver
+javax.jdo.option.ConnectionURL = jdbc:derby://hadoop1:1527/metastore_db;create = true
+javax.jdo.option.ConnectionUserName = APP
+javax.jdo.option.ConnectionPassword = mine
+
+source ~/.bashrc
+
+# Setup Hive in HDFS
+$HADOOP_HOME/bin/hadoop fs -mkdir /tmp 
+$HADOOP_HOME/bin/hadoop fs -mkdir /user
+$HADOOP_HOME/bin/hadoop fs -mkdir /user/hive
+$HADOOP_HOME/bin/hadoop fs -mkdir /user/hive/warehouse
+$HADOOP_HOME/bin/hadoop fs -chmod g+w /tmp 
+$HADOOP_HOME/bin/hadoop fs -chmod g+w /user/hive/warehouse
+
+cd $HIVE_HOME
+bin/schematool -initSchema -dbType derby
+bin/hive
+
+#PIG
+
+cd Desktop/course/softwares
+wget https://archive.apache.org/dist/pig/pig-0.17.0/pig-0.17.0.tar.gz
+tar -xzf pig-0.17.0.tar.gz
+mv pig-0.17.0 pig
+
+nano ~/.bashrc
+export PIG_HOME=$HOME/Desktop/course/softwares/pig
+export PATH=$PATH:$PIG_HOME/sbin:$PIG_HOME/bin
+export CLASSPATH=$CLASSPATH:$PIG_HOME/lib/*
+export PIG_CLASSPATH=$PIG_HOME/conf:$HADOOP_HOME/etc/hadoop
+export PIG_CONF_DIR=$PIG_HOME/conf
+export PIG_CLASSPATH=$PIG_CONF_DIR:$PATH
+
+source ~/.bashrc
+
+start-dfs.sh
+start-yarn.sh
+hdfs dfs -put /home/tri/hadoopdata/empdata.csv /user/data/empdata_pig.csv
