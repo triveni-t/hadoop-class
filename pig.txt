@@ -1,0 +1,40 @@
+mkdir hadoopdata
+cd hadoopdata
+
+nano empdata.csv
+ls
+hdfs dfs -ls /user/hive
+hdfs dfs -ls /user/hive/warehouse
+
+hdfs dfs -mkdir -p /user/data
+hdfs dfs -put /home/tri/hadoopdata/empdata.csv /user/data/empdata.csv
+
+hive
+show databases;
+create database if not exists A;
+Use A;
+
+create table if not exists emp(empno int, ename string, sal float, comm float, dpno int) row format delimited fields terminated by ',’;
+describe emp;
+
+load data local inpath '/home/tri/hadoopdata/empdata.csv' into table emp;
+
+Select * from emp;
+SET skip.header.line.count=1
+create external table  ext_emp1(empno int, ename string, sal float, comm float, dpno int) row format delimited fields terminated by ',';
+
+create external table  ext_emp2(empno int, ename string, sal float, comm float, dpno int) row format delimited fields terminated by ‘,’ location '/user/data/';
+describe ext_emp2;
+
+Table will be stored under /user/hive/warehouse/A.db/ext_emp2/emp
+
+load data local inpath '/home/tri/hadoopdata/empdata.csv' into table ext_emp2;
+
+set hive.exec.dynamic.partition.mode;
+set hive.exec.dynamic.partition.mode=nonstrict;
+
+create external table emp_dept (empno int, ename string, sal float, comm float) partitioned by (dpno int) row format delimited fields terminated by ',’;
+insert into table emp_dept partition(dpno) select * from emp;
+
+create table dept_buckk(empno int, ename string, sal float, comm float, dpno int)  clustered by (dpno) into 3 buckets row format delimited fields terminated by ‘,’;
+set hive.enforce.bucketing = true;
